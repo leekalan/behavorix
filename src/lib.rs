@@ -247,10 +247,10 @@ pub mod tests {
         };
 
         assert_eq!(size_of::<Player>(), 12); // I did not expect this was possible!
-        // The only memory overhead is the trait pointers to functions, which
-        // happen to always be necessary anyway (ignoring inline). The only
-        // significant overhead is the downcasting of `any` and corresponding
-        // memory which was a core feature I was ready to bear anyway.
+                                             // The only memory overhead is the trait pointers to functions, which
+                                             // happen to always be necessary anyway (ignoring inline). The only
+                                             // significant overhead is the downcasting of `any` and corresponding
+                                             // memory which was a core feature I was ready to bear anyway.
 
         let node_tree = NodeTree::new(Box::new(player));
 

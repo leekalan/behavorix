@@ -1,9 +1,12 @@
+use bevy::prelude::{Component, Resource};
+
 use crate::prelude::*;
 
 pub mod node_tree_mut_query;
 pub mod node_tree_query;
 pub mod node_tree_query_mut;
 
+#[derive(Component, Resource)]
 pub struct NodeTree<'key, Key: ?Sized + PartialEq + Eq + 'static> {
     node: Box<dyn Node<Key>>,
     keys: Vec<&'key Key>,
