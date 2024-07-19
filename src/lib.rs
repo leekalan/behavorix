@@ -247,12 +247,17 @@ pub mod tests {
         };
 
         assert_eq!(size_of::<Player>(), 12); // I did not expect this was possible!
-                                             // The only memory overhead is the trait pointers to functions, which
-                                             // happen to always be necessary anyway (ignoring inline). The only
-                                             // significant overhead is the downcasting of `any` and corresponding
-                                             // memory which was a core feature I was ready to bear anyway.
 
-        let node_tree = NodeTree::new(Box::new(player));
+        // The only memory overhead is the trait pointers to functions, which
+        // happen to always be necessary anyway (ignoring inline). The only
+        // significant overhead is the downcasting of `any` and corresponding
+        // memory which was a core feature I was ready to bear anyway.
+
+        // Worst case you could always cast the node back to its actual type with
+        // a single `any` downcast and then run optimal matching on it anyway if
+        // you are making like 1000 enemies or something
+
+        let node_tree = NodeTree::new(player);
 
         let query_shallow_search = node_tree.query().find_node("alive");
         assert!(query_shallow_search.is_some());

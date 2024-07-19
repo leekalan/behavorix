@@ -7,35 +7,51 @@ pub mod node_tree_query;
 pub mod node_tree_query_mut;
 
 #[derive(Component, Resource)]
-pub struct NodeTree<'key, Key: ?Sized + PartialEq + Eq + 'static> {
-    node: Box<dyn Node<Key>>,
+pub struct NodeTree<'key, T: Node<Key>, Key: ?Sized + PartialEq + Eq + 'static> {
+    node: T,
     keys: Vec<&'key Key>,
 }
 
-impl<'key, Key: ?Sized + PartialEq + Eq + 'static> NodeTree<'key, Key> {
-    pub fn new(node: Box<dyn Node<Key>>) -> Self {
-        let keys = DynNode(&*node).default_keys();
+impl<'key, T: Node<Key>, Key: ?Sized + PartialEq + Eq + 'static> NodeTree<'key, T, Key> {
+    pub fn new(node: T) -> Self {
+        let keys = DynNode(&node).default_keys();
 
         Self { node, keys }
     }
 
+    pub fn node(&self) -> &T {
+        &self.node
+    }
+
+    pub fn node_mut(&mut self) -> &mut T {
+        &mut self.node
+    }
+
+    pub fn keys(&self) -> &[&'key Key] {
+        &self.keys
+    }
+
+    pub fn keys_mut(&mut self) -> &mut Vec<&'key Key> {
+        &mut self.keys
+    }
+
     pub fn query<'n: 'key>(&'n self) -> NodeTreeQuery<'n, 'key, Key> {
         NodeTreeQuery {
-            node: &*self.node,
+            node: &self.node,
             keys: KeyIterator::new(&self.keys),
         }
     }
 
     pub fn mut_query<'n: 'key>(&'n mut self) -> NodeTreeMutQuery<'n, 'key, Key> {
         NodeTreeMutQuery {
-            node: &*self.node,
+            node: &self.node,
             keys: KeyIteratorMut::new(&mut self.keys),
         }
     }
 
     pub fn query_mut<'n: 'key>(&'n mut self) -> NodeTreeQueryMut<'n, 'key, Key> {
         NodeTreeQueryMut {
-            node: &mut *self.node,
+            node: &mut self.node,
             keys: KeyIteratorMut::new(&mut self.keys),
         }
     }
