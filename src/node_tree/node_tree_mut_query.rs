@@ -8,6 +8,14 @@ pub struct NodeTreeMutQuery<'n, 'key, Key: ?Sized + PartialEq + Eq + 'static> {
 }
 
 impl<'n, 'key, Key: ?Sized + PartialEq + Eq + 'static> NodeTreeMutQuery<'n, 'key, Key> {
+    pub fn node(&'n self) -> &'n dyn Node<Key> {
+        self.node
+    }
+
+    pub fn keys(&'n self) -> impl Iterator<Item = &'key Key> + 'n {
+        self.keys.as_key_iterator()
+    }
+
     pub fn as_node_tree_query(&'n self) -> NodeTreeQuery<'n, 'key, Key> {
         NodeTreeQuery {
             node: self.node,
@@ -34,6 +42,16 @@ impl<'n, 'key, Key: ?Sized + PartialEq + Eq + 'static> NodeTreeMutQuery<'n, 'key
         }
 
         None
+    }
+
+    pub fn get_default_config(&self) -> Option<&'n dyn Any> {
+        self.node.get_default_config()
+    }
+
+    pub fn get_default_config_as<T: 'static>(&self) -> Option<&'n T> {
+        self.node
+            .get_default_config()
+            .and_then(|c| c.downcast_ref())
     }
 
     pub fn get_config(&self, key: &Key) -> Option<&'n dyn Any> {

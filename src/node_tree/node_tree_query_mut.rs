@@ -8,10 +8,29 @@ pub struct NodeTreeQueryMut<'n, 'key, Key: ?Sized + PartialEq + Eq + 'static> {
 }
 
 impl<'n, 'key, Key: ?Sized + PartialEq + Eq + 'static> NodeTreeQueryMut<'n, 'key, Key> {
+    pub fn node(&'n self) -> &'n dyn Node<Key> {
+        self.node
+    }
+
+    pub fn node_mut(&'n mut self) -> &'n mut dyn Node<Key> {
+        self.node
+    }
+
+    pub fn keys(&'n self) -> impl Iterator<Item = &'key Key> + 'n {
+        self.keys.as_key_iterator()
+    }
+
     pub fn as_node_tree_query(&'n self) -> NodeTreeQuery<'n, 'key, Key> {
         NodeTreeQuery {
             node: self.node,
             keys: self.keys.as_key_iterator(),
+        }
+    }
+
+    pub fn as_node_tree_mut_query(self) -> NodeTreeMutQuery<'n, 'key, Key> {
+        NodeTreeMutQuery {
+            node: self.node,
+            keys: self.keys,
         }
     }
 
@@ -34,6 +53,16 @@ impl<'n, 'key, Key: ?Sized + PartialEq + Eq + 'static> NodeTreeQueryMut<'n, 'key
         }
 
         None
+    }
+
+    pub fn get_default_config(&'n self) -> Option<&'n dyn Any> {
+        self.node.get_default_config()
+    }
+
+    pub fn get_default_config_as<T: 'static>(&'n self) -> Option<&'n T> {
+        self.node
+            .get_default_config()
+            .and_then(|c| c.downcast_ref())
     }
 
     pub fn get_config(&'n self, key: &Key) -> Option<&'n dyn Any> {

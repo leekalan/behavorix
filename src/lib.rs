@@ -32,16 +32,20 @@ pub mod tests {
             })
         }
 
+        fn list_nodes_and_keys<'n>(
+            &'n self,
+        ) -> Box<dyn Iterator<Item = (&dyn Node<str>, &'static str)> + 'n> {
+            let list: [(&dyn Node<_>, _); 2] = [(&self.alive, "alive"), (&self.dead, "dead")];
+
+            Box::new(list.into_iter())
+        }
+
         fn is_valid_key(&self, key: &str) -> bool {
             key == "alive" || key == "dead"
         }
 
         fn default_node_and_key(&self) -> Option<(&dyn Node<str>, &'static str)> {
             Some((&self.alive, "alive"))
-        }
-
-        fn get_config<'n>(&'n self, _key: &str) -> Option<&'n dyn std::any::Any> {
-            None
         }
     }
 
@@ -67,6 +71,15 @@ pub mod tests {
             })
         }
 
+        fn list_nodes_and_keys<'n>(
+            &'n self,
+        ) -> Box<dyn Iterator<Item = (&dyn Node<str>, &'static str)> + 'n> {
+            let list: [(&dyn Node<_>, _); 2] =
+                [(&self.grounded, "grounded"), (&self.airborne, "airborne")];
+
+            Box::new(list.into_iter())
+        }
+
         fn is_valid_key(&self, key: &str) -> bool {
             key == "grounded" || key == "airborne"
         }
@@ -74,35 +87,11 @@ pub mod tests {
         fn default_node_and_key(&self) -> Option<(&dyn Node<str>, &'static str)> {
             Some((&self.grounded, "grounded"))
         }
-
-        fn get_config<'n>(&'n self, _key: &str) -> Option<&'n dyn std::any::Any> {
-            None
-        }
     }
 
     pub struct Dead;
 
-    impl Node<str> for Dead {
-        fn get_node<'n>(&'n self, _key: &str) -> Option<&'n dyn Node<str>> {
-            None
-        }
-
-        fn get_node_mut<'n>(&'n mut self, _key: &str) -> Option<&'n mut dyn Node<str>> {
-            None
-        }
-
-        fn is_valid_key(&self, _key: &str) -> bool {
-            false
-        }
-
-        fn default_node_and_key(&self) -> Option<(&dyn Node<str>, &'static str)> {
-            None
-        }
-
-        fn get_config<'n>(&'n self, _key: &str) -> Option<&'n dyn std::any::Any> {
-            None
-        }
-    }
+    impl Node<str> for Dead {}
 
     pub struct Grounded {
         movement: Movement,
@@ -123,16 +112,20 @@ pub mod tests {
             })
         }
 
+        fn list_nodes_and_keys<'n>(
+            &'n self,
+        ) -> Box<dyn Iterator<Item = (&dyn Node<str>, &'static str)> + 'n> {
+            let list: [(&dyn Node<_>, _); 1] = [(&self.movement, "movement")];
+
+            Box::new(list.into_iter())
+        }
+
         fn is_valid_key(&self, key: &str) -> bool {
             key == "movement"
         }
 
         fn default_node_and_key(&self) -> Option<(&dyn Node<str>, &'static str)> {
             Some((&self.movement, "movement"))
-        }
-
-        fn get_config<'n>(&'n self, _key: &str) -> Option<&'n dyn std::any::Any> {
-            None
         }
     }
 
@@ -158,16 +151,21 @@ pub mod tests {
             })
         }
 
+        fn list_nodes_and_keys<'n>(
+            &'n self,
+        ) -> Box<dyn Iterator<Item = (&dyn Node<str>, &'static str)> + 'n> {
+            let list: [(&dyn Node<_>, _); 2] =
+                [(&self.jumping, "jumping"), (&self.movement, "movement")];
+
+            Box::new(list.into_iter())
+        }
+
         fn is_valid_key(&self, key: &str) -> bool {
             key == "jumping" || key == "movement"
         }
 
         fn default_node_and_key(&self) -> Option<(&dyn Node<str>, &'static str)> {
             Some((&self.jumping, "jumping"))
-        }
-
-        fn get_config<'n>(&'n self, _key: &str) -> Option<&'n dyn std::any::Any> {
-            None
         }
     }
 
@@ -190,16 +188,20 @@ pub mod tests {
             })
         }
 
+        fn list_nodes_and_keys<'n>(
+            &'n self,
+        ) -> Box<dyn Iterator<Item = (&dyn Node<str>, &'static str)> + 'n> {
+            let list: [(&dyn Node<_>, _); 1] = [(&self.movement, "movement")];
+
+            Box::new(list.into_iter())
+        }
+
         fn is_valid_key(&self, key: &str) -> bool {
             key == "movement"
         }
 
         fn default_node_and_key(&self) -> Option<(&dyn Node<str>, &'static str)> {
             Some((&self.movement, "movement"))
-        }
-
-        fn get_config<'n>(&'n self, _key: &str) -> Option<&'n dyn std::any::Any> {
-            None
         }
     }
 
@@ -208,23 +210,7 @@ pub mod tests {
     }
 
     impl Node<str> for Movement {
-        fn get_node<'n>(&'n self, _key: &str) -> Option<&'n dyn Node<str>> {
-            None
-        }
-
-        fn get_node_mut<'n>(&'n mut self, _key: &str) -> Option<&'n mut dyn Node<str>> {
-            None
-        }
-
-        fn is_valid_key(&self, _key: &str) -> bool {
-            false
-        }
-
-        fn default_node_and_key(&self) -> Option<(&dyn Node<str>, &'static str)> {
-            None
-        }
-
-        fn get_config<'n>(&'n self, _key: &str) -> Option<&'n dyn std::any::Any> {
+        fn get_default_config(&self) -> Option<&dyn std::any::Any> {
             Some(&self.speed)
         }
     }
@@ -257,6 +243,10 @@ pub mod tests {
         // a single `any` downcast and then run optimal matching on it anyway if
         // you are making like 1000 enemies or something
 
+        // If you really want you can just have the node impl's as optional and
+        // treat the `NodeTree` as a typed object to have perfect performance
+        // and the potential for more complicated bevaviour later
+
         let node_tree = NodeTree::new(player);
 
         let query_shallow_search = node_tree.query().find_node("alive");
@@ -269,7 +259,7 @@ pub mod tests {
             .query()
             .find_node("movement")
             .unwrap()
-            .get_config_as::<f32>("lorem ipsum") // it will always return speed regardless of input.
+            .get_default_config_as::<f32>() // it will always return speed regardless of input
             // Typically you would want to actually have a match for readability but it is possible
             .unwrap();
 
