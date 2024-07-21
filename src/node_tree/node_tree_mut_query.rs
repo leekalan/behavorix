@@ -82,7 +82,7 @@ impl<'n, 'key, Key: ?Sized + PartialEq + Eq + 'static> NodeTreeMutQuery<'n, 'key
             return None;
         }
 
-        // TODO MOVING TO THE PLACE TO BE PASTING
+        // MOVING TO THE PLACE TO BE PASTING
 
         let mut new_path = Vec::new();
 
