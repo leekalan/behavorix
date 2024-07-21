@@ -247,7 +247,7 @@ pub mod tests {
         // treat the `NodeTree` as a typed object to have perfect performance
         // and the potential for more complicated bevaviour later
 
-        let node_tree = NodeTree::new(player);
+        let mut node_tree = NodeTree::new(player);
 
         let query_shallow_search = node_tree.query().find_node("alive");
         assert!(query_shallow_search.is_some());
@@ -267,5 +267,22 @@ pub mod tests {
 
         let failed_query = node_tree.query().find_node("jumping");
         assert!(failed_query.is_none());
+
+        let mut_query = node_tree.mut_query();
+
+        mut_query
+            .find_node("alive")
+            .unwrap()
+            .change_nodes(&["grounded"], &["airborne", "jumping"])
+            .unwrap();
+
+        let value_query = *node_tree
+            .query()
+            .find_node("movement")
+            .unwrap()
+            .get_default_config_as::<f32>()
+            .unwrap();
+
+        assert_eq!(value_query, 8.0);
     }
 }

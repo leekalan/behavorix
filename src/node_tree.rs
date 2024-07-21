@@ -35,21 +35,21 @@ impl<'key, T: Node<Key>, Key: ?Sized + PartialEq + Eq + 'static> NodeTree<'key, 
         &mut self.keys
     }
 
-    pub fn query<'n: 'key>(&'n self) -> NodeTreeQuery<'n, 'key, Key> {
+    pub fn query<'n>(&'n self) -> NodeTreeQuery<'n, 'key, Key> {
         NodeTreeQuery {
             node: &self.node,
             keys: KeyIterator::new(&self.keys),
         }
     }
 
-    pub fn mut_query<'n: 'key>(&'n mut self) -> NodeTreeMutQuery<'n, 'key, Key> {
+    pub fn mut_query<'n>(&'n mut self) -> NodeTreeMutQuery<'n, 'key, Key> {
         NodeTreeMutQuery {
             node: &self.node,
             keys: KeyIteratorMut::new(&mut self.keys),
         }
     }
 
-    pub fn query_mut<'n: 'key>(&'n mut self) -> NodeTreeQueryMut<'n, 'key, Key> {
+    pub fn query_mut<'n>(&'n mut self) -> NodeTreeQueryMut<'n, 'key, Key> {
         NodeTreeQueryMut {
             node: &mut self.node,
             keys: KeyIteratorMut::new(&mut self.keys),

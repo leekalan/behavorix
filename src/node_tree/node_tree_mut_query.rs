@@ -70,6 +70,8 @@ impl<'n, 'key, Key: ?Sized + PartialEq + Eq + 'static> NodeTreeMutQuery<'n, 'key
 
         let mut path = self.keys.as_key_iterator();
 
+        let path_truncate = path.index + 1;
+
         'from: for key in from {
             while let Some(p) = path.next() {
                 if **key == *p {
@@ -80,43 +82,48 @@ impl<'n, 'key, Key: ?Sized + PartialEq + Eq + 'static> NodeTreeMutQuery<'n, 'key
             return None;
         }
 
-        let path_truncate = path.index;
-
         // TODO MOVING TO THE PLACE TO BE PASTING
-
-        // The hard part is I need to traverse around the query trees to find each of
-        // the `to` nodes. Sadly this seems like it will be quite inefficient.
-        //
-        // There will be quite alot of reliance upon the user being direct with the
-        // `to` nodes for the more spread out nodes, such as rather than setting `to`
-        // as &["jumping"] it would be way more efficient to do &["airborne", "jumping"].
-        // This aproach will be linear time aslong as there is high specification.
-        // Otherwise it will probably be like exponential on N where N is the gap between
-        // specifications
-
-        let mut node = self.as_node_tree_query();
-
-        // for key in to {
-        //     let Valid::Valid(n) = node.find_node(key) else {
-        //         return None;
-        //     };
-
-        //     node = n;
-        // }
-
-        // ADDING TO THE PASTE LOCATION
 
         let mut new_path = Vec::new();
 
-        let mut node = node.node;
+        // As I did not want to implement tree traversal as there are 2 potential options
+        // 1. A very space heavy full of allocation BFS
+        // 2. A very time consuming node traversal DFS
 
-        'to: for key in path {
+        // Therefore I decided that I will just use the default node and if the user
+        // wants to change to something that is not default, they need to specify the
+        // path
+
+        let mut node = self.node;
+
+        'f: for key in to {
+            'l: loop {
+                if let Some(n) = node.get_node(key) {
+                    new_path.push(*key);
+                    node = n;
+                    continue 'f;
+                } else {
+                    let (default_node, default_key) = node.default_node_and_key()?;
+
+                    new_path.push(default_key);
+                    node = default_node;
+                    continue 'l;
+                }
+            }
+        }
+
+        // ADDING TO THE PASTE LOCATION
+
+        'paste: for key in path {
+            // Remainder of path that will be discarded
+            // This is to try maintain the same path from the new node as it only has linear time
+            // Just using the default nodes takes the same time complexity
             if let Some(n) = node.get_node(key) {
                 new_path.push(key);
                 node = n;
-                continue 'to;
+                continue 'paste;
             } else {
-                break 'to;
+                break 'paste;
             }
         }
 
